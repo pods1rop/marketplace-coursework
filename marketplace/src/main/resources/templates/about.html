@@ -64,25 +64,25 @@
                 <div class="bg-[#0a0a0a] p-8 lg:p-10 group hover:bg-[#141414] transition">
                     <i class="fas fa-box-open text-[#3FB6E4] text-[22px] mb-4 block"></i>
                     <p class="text-white text-[40px] lg:text-[52px] font-bold leading-none stat-num"
-                       th:text="${productsCount}">0</p>
+                       th:attr="data-count=${productsCount}">0</p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Товаров</p>
                 </div>
                 <div class="bg-[#0a0a0a] p-8 lg:p-10 group hover:bg-[#141414] transition">
                     <i class="fas fa-tag text-[#3FB6E4] text-[22px] mb-4 block"></i>
                     <p class="text-white text-[40px] lg:text-[52px] font-bold leading-none stat-num"
-                       th:text="${brandsCount}">0</p>
+                       th:attr="data-count=${brandsCount}">0</p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Брендов</p>
                 </div>
                 <div class="bg-[#0a0a0a] p-8 lg:p-10 group hover:bg-[#141414] transition">
                     <i class="fas fa-th-large text-[#3FB6E4] text-[22px] mb-4 block"></i>
                     <p class="text-white text-[40px] lg:text-[52px] font-bold leading-none stat-num"
-                       th:text="${categoriesCount}">0</p>
+                       th:attr="data-count=${categoriesCount}">0</p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Категорий</p>
                 </div>
                 <div class="bg-[#0a0a0a] p-8 lg:p-10 group hover:bg-[#141414] transition">
                     <i class="fas fa-users text-[#3FB6E4] text-[22px] mb-4 block"></i>
                     <p class="text-white text-[40px] lg:text-[52px] font-bold leading-none stat-num"
-                       th:text="${usersCount}">0</p>
+                       th:attr="data-count=${usersCount}">0</p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Пользователей</p>
                 </div>
             </div>
@@ -329,5 +329,6 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script src="/js/count-up.js"></script>
 </body>
 </html>

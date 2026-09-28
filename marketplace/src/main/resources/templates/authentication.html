@@ -236,17 +236,23 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/8">
                 <div class="bg-[#0a0a0a] p-8 hover:bg-[#141414] transition">
                     <i class="fas fa-check-double text-[#3FB6E4] text-[22px] mb-4 block"></i>
-                    <p class="text-white text-[36px] lg:text-[44px] font-bold leading-none">17.6<span class="text-[#3FB6E4]">M+</span></p>
+                    <p class="text-white text-[36px] lg:text-[44px] font-bold leading-none">
+                        <span data-count="17.6" data-decimals="1">0</span><span class="text-[#3FB6E4]">M+</span>
+                    </p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Проверок выполнено</p>
                 </div>
                 <div class="bg-[#0a0a0a] p-8 hover:bg-[#141414] transition">
                     <i class="fas fa-shield-virus text-[#3FB6E4] text-[22px] mb-4 block"></i>
-                    <p class="text-white text-[36px] lg:text-[44px] font-bold leading-none">3.9<span class="text-[#3FB6E4]">M</span></p>
+                    <p class="text-white text-[36px] lg:text-[44px] font-bold leading-none">
+                        <span data-count="3.9" data-decimals="1">0</span><span class="text-[#3FB6E4]">M</span>
+                    </p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Подделок выявлено</p>
                 </div>
                 <div class="bg-[#0a0a0a] p-8 hover:bg-[#141414] transition">
                     <i class="fas fa-user-tie text-[#3FB6E4] text-[22px] mb-4 block"></i>
-                    <p class="text-white text-[36px] lg:text-[44px] font-bold leading-none">2 000<span class="text-[#3FB6E4]">+</span></p>
+                    <p class="text-white text-[36px] lg:text-[44px] font-bold leading-none">
+                        <span data-count="2000">0</span><span class="text-[#3FB6E4]">+</span>
+                    </p>
                     <p class="text-white/45 text-[11px] uppercase tracking-[0.2em] mt-3">Экспертов в команде</p>
                 </div>
                 <div class="bg-[#0a0a0a] p-8 hover:bg-[#141414] transition">
@@ -340,11 +346,11 @@
                     </div>
                     <div class="flex items-center justify-between text-[12.5px] py-2 border-b border-white/8">
                         <span class="text-white/45">Проверенных частей</span>
-                        <span class="text-white/85">11 из 11</span>
+                        <span class="text-white/85"><span data-count="11">0</span> из 11</span>
                     </div>
                     <div class="flex items-center justify-between text-[12.5px] py-2 border-b border-white/8">
                         <span class="text-white/45">Точность ИИ</span>
-                        <span class="text-[#3FB6E4] font-semibold">99,4%</span>
+                        <span class="text-[#3FB6E4] font-semibold"><span data-count="99.4" data-decimals="1">0</span>%</span>
                     </div>
                     <div class="flex items-center justify-between text-[12.5px] py-2">
                         <span class="text-white/45">Эксперт</span>
@@ -448,5 +454,6 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script src="/js/count-up.js"></script>
 </body>
 </html>

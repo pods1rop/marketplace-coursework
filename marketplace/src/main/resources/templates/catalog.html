@@ -94,7 +94,9 @@
             <th:block th:if="${selectedCategory == null and search != null}" th:text="'Поиск: ' + ${search}"></th:block>
             <th:block th:if="${selectedCategory == null and search == null}">Каталог</th:block>
         </h1>
-        <p id="total-items" class="text-white/35 text-[12px] mt-2 uppercase tracking-[0.15em]" th:text="${totalItems} + ' товаров'">0 товаров</p>
+        <p id="total-items" class="text-white/35 text-[12px] mt-2 uppercase tracking-[0.15em]">
+            <span th:attr="data-count=${totalItems}">0</span> товаров
+        </p>
     </div>
 
     <!-- ═══ СЕТКА: САЙДБАР + КАТАЛОГ ═══ -->
@@ -594,5 +596,6 @@
     rebind();
 })();
 </script>
+<script src="/js/count-up.js"></script>
 </body>
 </html>
