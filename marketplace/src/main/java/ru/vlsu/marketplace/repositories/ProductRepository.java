@@ -2,6 +2,7 @@ package ru.vlsu.marketplace.repositories;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +20,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     Page<Product> findByStatus(Product.Status status, Pageable pageable);
 
+    // Категория, бренд и продавец подгружаются тем же запросом (JOIN FETCH) — без N+1 при выводе каталога
+    @EntityGraph(attributePaths = {"category", "brand", "seller"})
     @Query("SELECT p FROM Product p WHERE p.status = 'APPROVED' " +
            "AND (:categoryId IS NULL OR p.category.id = :categoryId) " +
            "AND (:brandId IS NULL OR p.brand.id = :brandId) " +

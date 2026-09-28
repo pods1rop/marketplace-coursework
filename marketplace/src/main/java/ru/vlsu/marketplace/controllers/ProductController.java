@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,7 @@ import ru.vlsu.marketplace.repositories.ProductImageRepository;
 import ru.vlsu.marketplace.services.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 
 @Controller
@@ -34,6 +36,9 @@ public class ProductController {
     private final ReviewService reviewService;
     private final FavoriteService favoriteService;
     private final ProductImageRepository productImageRepository;
+
+    /** Изображения товаров кешируются браузером на сутки. */
+    private static final CacheControl IMAGE_CACHE = CacheControl.maxAge(Duration.ofDays(1)).cachePublic();
 
     @GetMapping("/product/{id}")
     public String productPage(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -72,7 +77,8 @@ public class ProductController {
     public ResponseEntity<byte[]> productImage(@PathVariable Integer id) {
         Product product = productService.findById(id).orElseThrow();
         if (product.getImageData() != null) {
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(product.getImageData());
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
+                    .cacheControl(IMAGE_CACHE).body(product.getImageData());
         }
         return ResponseEntity.notFound().build();
     }
@@ -84,7 +90,8 @@ public class ProductController {
         if (!image.getProduct().getId().equals(productId)) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image.getImageData());
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG)
+                .cacheControl(IMAGE_CACHE).body(image.getImageData());
     }
 
     @PostMapping("/product/{id}/review")

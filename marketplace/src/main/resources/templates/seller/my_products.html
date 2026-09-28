@@ -99,7 +99,8 @@
                        class="w-8 h-8 flex items-center justify-center border border-white/10 text-white/35 hover:text-white hover:border-white/30 transition">
                         <i class="fas fa-pen text-[10px]"></i>
                     </a>
-                    <form th:action="@{'/seller/products/' + ${p.id} + '/delete'}" method="post">
+                    <form th:action="@{'/seller/products/' + ${p.id} + '/delete'}" method="post"
+                          onsubmit="return confirm('Снять товар с продажи? Его можно будет вернуть во вкладке «Снятые».')">
                         <button class="w-8 h-8 flex items-center justify-center border border-white/10 text-white/35 hover:text-red-400 hover:border-red-400/30 transition">
                             <i class="fas fa-trash-alt text-[10px]"></i>
                         </button>
