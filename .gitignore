@@ -1,0 +1,24 @@
+# Сборка
+marketplace/target/
+marketplace/.mvn/wrapper/maven-wrapper.jar
+
+# Локальные настройки и секреты
+marketplace/src/main/resources/credentials.properties
+
+# Логи и временные файлы
+*.log
+marketplace/logs/
+marketplace/cookies.txt
+marketplace/load-tests/results/*.jtl
+~$*
+*.tmp
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# ОС
+Thumbs.db
+.DS_Store
+marketplace/load-tests/e2e/
