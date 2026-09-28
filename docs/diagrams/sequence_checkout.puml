@@ -1,0 +1,76 @@
+@startuml sequence_checkout
+skinparam dpi 170
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam ParticipantPadding 6
+skinparam BoxPadding 4
+skinparam sequence {
+  ParticipantBackgroundColor #EEF4FB
+  ParticipantBorderColor #4C72B0
+  LifeLineBorderColor #8C8C8C
+  ActorBorderColor #4C72B0
+  ActorBackgroundColor #EEF4FB
+  GroupBorderColor #DD8452
+  GroupBackgroundColor #FFF6EE
+}
+
+actor "Покупатель" as U
+participant "Браузер" as B
+participant "SecurityFilterChain\n(CsrfFilter)" as F
+participant "CartController" as CC
+participant "CartService" as CS
+participant "OrderController" as OC
+participant "OrderService\n@Transactional" as OS
+participant "NotificationService" as NS
+database "MySQL" as DB
+
+U -> B : нажимает «Купить»
+B -> F : POST /cart/add/{id}\n(_csrf, JSESSIONID)
+activate F
+F -> F : проверка сессии\nи CSRF-токена
+F -> CC : addToCart(id)
+deactivate F
+activate CC
+CC -> CS : addToCart(user, id)
+activate CS
+CS -> DB : SELECT product
+DB --> CS : Product
+alt статус товара ≠ APPROVED или товар свой
+  CS --> CC : IllegalStateException
+  CC --> B : 302 назад на товар\n+ сообщение об ошибке
+else товар доступен
+  CS -> DB : INSERT / UPDATE cart_items
+  CS --> CC
+  deactivate CS
+  CC --> B : 302 → /cart
+  deactivate CC
+end
+
+U -> B : заполняет ФИО, телефон, адрес\nи подтверждает заказ
+B -> F : POST /orders/checkout (_csrf)
+F -> OC : checkout(@Valid OrderDto)
+activate OC
+alt ошибка валидации формы
+  OC --> B : 302 → /orders/checkout\n+ текст ошибки
+else данные корректны
+  OC -> OS : createOrder(buyer, dto)
+  activate OS
+  OS -> DB : BEGIN; SELECT cart_items JOIN products
+  loop для каждой позиции корзины
+    OS -> OS : проверка статуса APPROVED,\nснимок цены в OrderItem
+  end
+  OS -> DB : INSERT orders, order_items
+  OS -> NS : notify(покупатель, продавцы)
+  activate NS
+  NS -> DB : INSERT notifications
+  deactivate NS
+  OS -> DB : DELETE cart_items; COMMIT
+  OS --> OC : Order
+  deactivate OS
+  OC --> B : 302 → /orders\n«Заказ №N оформлен»
+end
+deactivate OC
+B -> U : история заказов
+@enduml

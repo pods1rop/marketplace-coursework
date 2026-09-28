@@ -1,0 +1,158 @@
+@startuml er
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam entityBackgroundColor #F7F9FC
+skinparam entityBorderColor #4C72B0
+hide circle
+
+entity "users" as users {
+  * id : INT <<PK>>
+  --
+  * username : VARCHAR(50) <<UNIQUE>>
+  * email : VARCHAR(100) <<UNIQUE>>
+  * password_hash : VARCHAR(255)
+  bio : VARCHAR(255)
+  profile_pic : LONGBLOB
+  registered_at : DATETIME
+  * role : ENUM
+  * active : BIT
+}
+
+entity "categories" as categories {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(100) <<UNIQUE>>
+}
+
+entity "brands" as brands {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(100) <<UNIQUE>>
+  description : VARCHAR(500)
+  logo : LONGBLOB
+}
+
+entity "products" as products {
+  * id : INT <<PK>>
+  --
+  * title : VARCHAR(200)
+  description : TEXT
+  * price : DECIMAL(10,2)
+  old_price : DECIMAL(10,2)
+  * product_condition : ENUM
+  * status : ENUM
+  reject_reason : VARCHAR(500)
+  gender, season : ENUM
+  color, material, size : VARCHAR
+  image_data : LONGBLOB
+  fk_category : INT <<FK>>
+  fk_brand : INT <<FK>>
+  * fk_seller : INT <<FK>>
+  created_at : DATETIME
+}
+
+entity "product_images" as product_images {
+  * id : INT <<PK>>
+  --
+  * fk_product : INT <<FK>>
+  * image_data : LONGBLOB
+  * sort_order : INT
+}
+
+entity "orders" as orders {
+  * id : INT <<PK>>
+  --
+  * fk_buyer : INT <<FK>>
+  * status : ENUM
+  delivery_address : VARCHAR(500)
+  contact_name : VARCHAR(100)
+  contact_phone : VARCHAR(20)
+  total_amount : DECIMAL(10,2)
+  created_at : DATETIME
+}
+
+entity "order_items" as order_items {
+  * id : INT <<PK>>
+  --
+  * fk_order : INT <<FK>>
+  * fk_product : INT <<FK>>
+  * price : DECIMAL(10,2)
+  * quantity : INT
+}
+
+entity "cart_items" as cart_items {
+  * id : INT <<PK>>
+  --
+  * fk_user : INT <<FK>>
+  * fk_product : INT <<FK>>
+  * quantity : INT
+}
+
+entity "favorites" as favorites {
+  * id : INT <<PK>>
+  --
+  * fk_user : INT <<FK>>
+  * fk_product : INT <<FK>>
+}
+
+entity "reviews" as reviews {
+  * id : INT <<PK>>
+  --
+  * fk_user : INT <<FK>>
+  * fk_product : INT <<FK>>
+  * rating : TINYINT
+  text : TEXT
+  created_at : DATETIME
+}
+
+entity "notifications" as notifications {
+  * id : INT <<PK>>
+  --
+  * fk_user : INT <<FK>>
+  * type : ENUM
+  * text : VARCHAR(500)
+  link : VARCHAR(255)
+  * is_read : BIT
+  * created_at : DATETIME
+}
+
+entity "warnings" as warnings {
+  * id : INT <<PK>>
+  --
+  * fk_user : INT <<FK>>
+  * fk_moderator : INT <<FK>>
+  * type : ENUM
+  comment : VARCHAR(500)
+  * created_at : DATETIME
+}
+
+entity "seller_requests" as seller_requests {
+  * id : INT <<PK>>
+  --
+  * fk_user : INT <<FK>>
+  * shop_name : VARCHAR(100)
+  description : VARCHAR(1000)
+  * status : ENUM
+  * created_at : DATETIME
+}
+
+users ||--o{ products
+users ||--o{ orders
+users ||--o{ cart_items
+users ||--o{ favorites
+users ||--o{ reviews
+users ||--o{ notifications
+users ||--o{ warnings
+users ||--o{ seller_requests
+categories ||--o{ products
+brands ||--o{ products
+products ||--o{ product_images
+products ||--o{ order_items
+products ||--o{ cart_items
+products ||--o{ favorites
+products ||--o{ reviews
+orders ||--|{ order_items
+@enduml

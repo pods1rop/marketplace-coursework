@@ -1,0 +1,63 @@
+@startuml bpmn_moderation
+skinparam dpi 170
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam ActivityBackgroundColor #EEF4FB
+skinparam ActivityBorderColor #4C72B0
+skinparam ActivityDiamondBackgroundColor #FFF3C4
+skinparam ActivityDiamondBorderColor #C9A227
+skinparam SwimlaneBorderColor #8C8C8C
+skinparam SwimlaneTitleFontStyle bold
+skinparam ArrowColor #333333
+
+|#F7F9FC|Продавец|
+start
+:Открыть кабинет продавца;
+:Заполнить форму товара
+(название, цена, категория,
+состояние, фотографии);
+|#FFFFFF|Система|
+:Проверить форму
+(Jakarta Validation, тип файлов);
+if (Данные корректны?) then (нет)
+  |Продавец|
+  :Увидеть сообщение об ошибке
+  и исправить форму;
+  detach
+else (да)
+  |Система|
+  :Сохранить товар
+  со статусом PENDING;
+endif
+|#F7F9FC|Модератор|
+:Открыть очередь «На модерации»;
+:Проверить товар на соответствие
+правилам площадки;
+if (Товар соответствует?) then (да)
+  :Нажать «Одобрить»;
+  |Система|
+  :Статус APPROVED,
+  товар появляется в каталоге;
+  :Уведомление продавцу
+  «Товар опубликован»;
+  |Продавец|
+  :Получить уведомление;
+  stop
+else (нет)
+  |Модератор|
+  :Указать причину отклонения;
+  |Система|
+  :Статус REJECTED,
+  причина сохраняется;
+  :Уведомление продавцу
+  с причиной;
+  |Продавец|
+  :Исправить товар
+  во вкладке «Отклонённые»;
+  |Система|
+  :Статус снова PENDING
+  (повторная подача);
+  stop
+endif
+@enduml

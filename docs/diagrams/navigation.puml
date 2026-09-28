@@ -1,0 +1,73 @@
+@startuml navigation
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #F7F9FC
+  BorderColor #4C72B0
+}
+
+state "Главная\n/ (index.html)" as home
+state "Вход / регистрация\n/auth" as auth
+state "Каталог\n/catalog" as catalog
+state "Страница товара\n/product/{id}" as product
+state "Бренды\n/brands" as brands
+state "О нас\n/about" as about
+state "Онлайн-проверка\n/authentication" as authn
+
+state "Покупатель" as buyer_group {
+  state "Корзина\n/cart" as cart
+  state "Оформление заказа\n/orders/checkout" as checkout
+  state "Мои заказы\n/orders" as orders
+  state "Профиль /profile\nвкладки: избранное, отзывы,\nуведомления, стать продавцом,\nпредупреждения" as profile
+}
+
+state "Продавец" as seller_group {
+  state "Мои товары\n/seller/products" as my_products
+  state "Добавить товар\n/seller/products/new" as add_product
+  state "Редактировать товар\n/seller/products/{id}/edit" as edit_product
+  state "Заказы покупателей\n/seller/orders" as seller_orders
+}
+
+state "Модератор" as mod_group {
+  state "Очередь модерации\n/moderation" as moderation
+  state "Нарушители\n/moderation/users" as mod_users
+}
+
+state "Администратор" as admin_group {
+  state "Дашборд, заявки продавцов\n/admin/dashboard" as dashboard
+  state "Пользователи и роли\n/admin/users" as user_list
+  state "CSV-отчёт\n/admin/report" as report
+}
+
+[*] --> home
+home --> auth : Войти
+auth --> home : успешный вход
+home --> catalog : Каталог / поиск
+home --> brands
+home --> about
+home --> authn
+brands --> catalog : товары бренда
+catalog --> product : клик по карточке
+product --> cart : Купить
+product --> profile : В избранное
+cart --> checkout : Оформить
+checkout --> orders : заказ оформлен
+home --> profile : иконка профиля\nили колокольчик
+profile --> orders
+
+home --> my_products : [seller]
+my_products --> add_product
+my_products --> edit_product
+my_products --> seller_orders
+
+home --> moderation : [moderator]
+moderation --> mod_users
+
+home --> dashboard : [admin]
+dashboard --> user_list
+dashboard --> report
+dashboard --> moderation
+@enduml

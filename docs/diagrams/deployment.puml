@@ -1,0 +1,48 @@
+@startuml deployment
+!pragma layout smetana
+skinparam dpi 170
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam nodeBackgroundColor #EEF4FB
+skinparam nodeBorderColor #4C72B0
+skinparam artifactBackgroundColor #FFFFFF
+skinparam componentBackgroundColor #FFF6EE
+skinparam componentBorderColor #DD8452
+skinparam databaseBackgroundColor #F1F8EE
+skinparam databaseBorderColor #55A868
+skinparam cloudBackgroundColor #F7F7F7
+
+
+node "<<device>>\nУстройство пользователя\n(ПК / смартфон)" as client {
+  node "<<execution environment>>\nВеб-браузер\nChrome / Firefox / Edge" as browser {
+    artifact "HTML-страницы (Thymeleaf)\n+ main.css, count-up.js" as pages
+  }
+}
+
+cloud "CDN\n(Tailwind CSS, Font Awesome,\nGoogle Fonts)" as cdn
+
+node "<<device>>\nСервер приложений\n(Windows / Linux, JRE 17+)" as app {
+  node "<<execution environment>>\nВстроенный Apache Tomcat 10\n(порт 8080)" as tomcat {
+    artifact "marketplace.jar\n(Spring Boot 3.2)" as jar {
+      component "Spring Security\n(форма входа, CSRF, BCrypt)" as sec
+      component "Контроллеры\nSpring MVC" as ctrl
+      component "Сервисы\n(бизнес-логика)" as svc
+      component "Репозитории\nSpring Data JPA / Hibernate" as repo
+      component "Шаблоны Thymeleaf\n+ статические ресурсы" as tpl
+    }
+  }
+}
+
+node "<<device>>\nСервер СУБД" as dbsrv {
+  database "MySQL 8.0\nбаза marketplacedb\n(товары, заказы, пользователи,\nизображения в LONGBLOB)" as mysql
+}
+
+browser --> tomcat : HTTP(S)\nсессия JSESSIONID
+browser ..> cdn : HTTPS\n(стили, шрифты, иконки)
+sec --> ctrl
+ctrl --> svc
+ctrl --> tpl
+svc --> repo
+repo --> mysql : JDBC\n(пул HikariCP), TCP 3306
+@enduml

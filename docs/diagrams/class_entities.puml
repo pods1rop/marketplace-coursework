@@ -1,0 +1,140 @@
+@startuml class_entities
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName "Arial"
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam classBackgroundColor #F7F9FC
+skinparam classBorderColor #4C72B0
+skinparam ArrowColor #555555
+
+class User <<@Entity>> {
+  -id : Integer <<PK>>
+  -username : String <<UNIQUE, 50>>
+  -email : String <<UNIQUE, 100>>
+  -passwordHash : String
+  -bio : String
+  -profilePic : byte[] <<LONGBLOB>>
+  -registeredAt : Instant
+  -role : Role {buyer, seller, moderator, admin}
+  -active : boolean
+}
+
+class Category <<@Entity>> {
+  -id : Integer <<PK>>
+  -name : String <<UNIQUE>>
+}
+
+class Brand <<@Entity>> {
+  -id : Integer <<PK>>
+  -name : String <<UNIQUE>>
+  -description : String
+  -logo : byte[] <<LONGBLOB>>
+}
+
+class Product <<@Entity>> {
+  -id : Integer <<PK>>
+  -title : String <<200>>
+  -description : String <<TEXT>>
+  -price : BigDecimal
+  -oldPrice : BigDecimal
+  -condition : Condition {NEW, USED, VINTAGE}
+  -status : Status {PENDING, APPROVED, REJECTED, REMOVED}
+  -rejectReason : String <<500>>
+  -gender, season, color, material, size
+  -imageData : byte[] <<LONGBLOB>>
+  -createdAt : Instant
+}
+
+class ProductImage <<@Entity>> {
+  -id : Integer <<PK>>
+  -imageData : byte[] <<LONGBLOB>>
+  -sortOrder : Integer
+}
+
+class Order <<@Entity>> {
+  -id : Integer <<PK>>
+  -status : Status {NEW, CONFIRMED, IN_DELIVERY,
+  DELIVERED, COMPLETED, CANCELLED}
+  -deliveryAddress : String
+  -contactName : String
+  -contactPhone : String
+  -totalAmount : BigDecimal
+  -createdAt : Instant
+}
+
+class OrderItem <<@Entity>> {
+  -id : Integer <<PK>>
+  -price : BigDecimal
+  -quantity : Integer
+}
+
+class CartItem <<@Entity>> {
+  -id : Integer <<PK>>
+  -quantity : Integer
+  ..
+  UNIQUE(fk_user, fk_product)
+}
+
+class Favorite <<@Entity>> {
+  -id : Integer <<PK>>
+  ..
+  UNIQUE(fk_user, fk_product)
+}
+
+class Review <<@Entity>> {
+  -id : Integer <<PK>>
+  -rating : Byte <<1..5>>
+  -text : String <<TEXT>>
+  -createdAt : Instant
+  ..
+  UNIQUE(fk_user, fk_product)
+}
+
+class Notification <<@Entity>> {
+  -id : Integer <<PK>>
+  -type : Type {ORDER, MODERATION,
+  WARNING, ROLE, SYSTEM}
+  -text : String <<500>>
+  -link : String
+  -read : boolean
+  -createdAt : Instant
+}
+
+class Warning <<@Entity>> {
+  -id : Integer <<PK>>
+  -type : Type {SPAM, FRAUD, RUDENESS,
+  FAKE_PRODUCT, OTHER}
+  -comment : String <<500>>
+  -createdAt : Instant
+}
+
+class SellerRequest <<@Entity>> {
+  -id : Integer <<PK>>
+  -shopName : String <<100>>
+  -description : String
+  -status : Status {PENDING, APPROVED, REJECTED}
+  -createdAt : Instant
+}
+
+User "1" -- "0..*" Product : продаёт >
+User "1" -- "0..*" Order : оформляет >
+User "1" -- "0..*" CartItem
+User "1" -- "0..*" Favorite
+User "1" -- "0..*" Review : пишет >
+User "1" -- "0..*" Notification : получает >
+User "1" -- "0..*" Warning : получает >
+User "1" -- "0..*" Warning : выносит\n(модератор) >
+User "1" -- "0..*" SellerRequest : подаёт >
+
+Category "1" -- "0..*" Product
+Brand "1" -- "0..*" Product
+Product "1" *-- "0..*" ProductImage
+Product "1" -- "0..*" Review
+Product "1" -- "0..*" OrderItem
+Product "1" -- "0..*" CartItem
+Product "1" -- "0..*" Favorite
+Order "1" *-- "1..*" OrderItem
+@enduml
