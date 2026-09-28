@@ -22,6 +22,9 @@
             <h1 class="text-white text-[24px] font-light tracking-wide">Модерация товаров</h1>
         </div>
         <div class="flex items-center gap-3">
+            <a href="/moderation/users" class="mr-4 flex items-center gap-2 px-4 py-2 border border-white/10 text-white/50 text-[11px] uppercase tracking-[0.15em] hover:text-white hover:border-white/30 transition">
+                <i class="fas fa-user-shield text-[10px]"></i> Пользователи
+            </a>
             <div class="w-2 h-2 rounded-full bg-yellow-400/80 animate-pulse"></div>
             <span class="text-white/50 text-[13px]">
                 Ожидает: <span class="text-yellow-400/90 font-medium" th:text="${#lists.size(pendingProducts)}">0</span>
@@ -55,7 +58,7 @@
                     </div>
                     <!-- Бейдж состояния -->
                     <span class="absolute top-3 left-3 text-[10px] uppercase tracking-[0.15em] px-2 py-0.5 bg-black/60 backdrop-blur-sm"
-                          th:classappend="${p.condition == T(ru.vlsu.marketplace.entities.Product.Condition).NEW} ? 'text-emerald-400/80' : (${p.condition == T(ru.vlsu.marketplace.entities.Product.Condition).VINTAGE} ? 'text-amber-400/80' : 'text-white/60')"
+                          th:classappend="${p.condition.name() == 'NEW'} ? 'text-emerald-400/80' : (${p.condition.name() == 'VINTAGE'} ? 'text-amber-400/80' : 'text-white/60')"
                           th:text="${p.condition}"></span>
                 </div>
 
@@ -98,11 +101,10 @@
                                title="Открыть">
                                 <i class="fas fa-external-link-alt text-[11px]"></i>
                             </a>
-                            <form th:action="@{'/moderation/reject/' + ${p.id}}" method="post">
-                                <button class="px-5 py-2.5 border border-red-400/20 text-red-400/80 text-[11px] uppercase tracking-[0.15em] hover:bg-red-400/8 hover:border-red-400/40 transition flex items-center gap-2">
-                                    <i class="fas fa-times text-[10px]"></i> Отклонить
-                                </button>
-                            </form>
+                            <button type="button" th:onclick="'toggleReject(' + ${p.id} + ')'"
+                                    class="px-5 py-2.5 border border-red-400/20 text-red-400/80 text-[11px] uppercase tracking-[0.15em] hover:bg-red-400/8 hover:border-red-400/40 transition flex items-center gap-2">
+                                <i class="fas fa-times text-[10px]"></i> Отклонить
+                            </button>
                             <form th:action="@{'/moderation/approve/' + ${p.id}}" method="post">
                                 <button class="px-5 py-2.5 bg-emerald-400/15 border border-emerald-400/30 text-emerald-400 text-[11px] uppercase tracking-[0.15em] hover:bg-emerald-400/25 transition flex items-center gap-2">
                                     <i class="fas fa-check text-[10px]"></i> Одобрить
@@ -110,6 +112,17 @@
                             </form>
                         </div>
                     </div>
+
+                    <!-- Причина отклонения -->
+                    <form th:id="'reject-' + ${p.id}" th:action="@{'/moderation/reject/' + ${p.id}}" method="post"
+                          class="hidden flex-col sm:flex-row gap-2 pt-3">
+                        <input type="text" name="reason" required maxlength="500"
+                               placeholder="Причина отклонения (увидит продавец)"
+                               class="flex-1 bg-[#1a1a1a] border border-red-400/20 text-white text-[13px] px-3 py-2.5 focus:border-red-400/50 outline-none transition placeholder:text-white/25">
+                        <button class="px-5 py-2.5 bg-red-500/15 border border-red-400/30 text-red-300 text-[11px] uppercase tracking-[0.15em] hover:bg-red-500/25 transition">
+                            Подтвердить отклонение
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -117,6 +130,14 @@
 
 </div>
 </main>
+<script>
+    function toggleReject(id) {
+        const f = document.getElementById('reject-' + id);
+        f.classList.toggle('hidden');
+        f.classList.toggle('flex');
+        if (!f.classList.contains('hidden')) f.querySelector('input').focus();
+    }
+</script>
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

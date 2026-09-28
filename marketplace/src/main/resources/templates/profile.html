@@ -102,6 +102,20 @@
             Отзывы
             <span class="ml-2 text-white/30 text-[10px]" th:text="${#lists.size(reviews)}"></span>
         </button>
+        <button id="tab-btn-notifications" onclick="switchTab('notifications')"
+                class="px-1 pb-4 mr-8 text-[11px] uppercase tracking-[0.25em] border-b-2 border-transparent text-white/35 hover:text-white/60 transition">
+            Уведомления
+            <span th:if="${unreadNotifications > 0}" class="ml-2 text-[#3FB6E4] text-[10px]" th:text="${unreadNotifications}"></span>
+        </button>
+        <button th:if="${user.role.name() == 'buyer'}" id="tab-btn-seller" onclick="switchTab('seller')"
+                class="px-1 pb-4 mr-8 text-[11px] uppercase tracking-[0.25em] border-b-2 border-transparent text-white/35 hover:text-white/60 transition">
+            Стать продавцом
+        </button>
+        <button th:if="${!#lists.isEmpty(warnings)}" id="tab-btn-warnings" onclick="switchTab('warnings')"
+                class="px-1 pb-4 mr-8 text-[11px] uppercase tracking-[0.25em] border-b-2 border-transparent text-white/35 hover:text-white/60 transition">
+            Предупреждения
+            <span class="ml-2 text-red-400/70 text-[10px]" th:text="${#lists.size(warnings)}"></span>
+        </button>
     </div>
 
     <!-- ═══ ТАБ: ИЗБРАННОЕ ═══ -->
@@ -162,6 +176,96 @@
         </div>
     </div>
 
+    <!-- ═══ ТАБ: УВЕДОМЛЕНИЯ ═══ -->
+    <div id="tab-notifications" class="tab-panel">
+        <div class="flex items-center justify-between mb-4" th:if="${!#lists.isEmpty(notifications)}">
+            <p class="text-white/30 text-[11px] uppercase tracking-[0.2em]">Последние события</p>
+            <form th:if="${unreadNotifications > 0}" th:action="@{/profile/notifications/read}" method="post">
+                <button class="text-white/40 text-[11px] uppercase tracking-[0.15em] hover:text-white/80 transition">
+                    <i class="fas fa-check-double text-[10px] mr-1"></i> Отметить все прочитанными
+                </button>
+            </form>
+        </div>
+        <div th:if="${#lists.isEmpty(notifications)}" class="py-20 text-center">
+            <i class="far fa-bell text-white/8 text-5xl mb-6"></i>
+            <p class="text-white/25 text-[12px] uppercase tracking-[0.2em]">Уведомлений пока нет</p>
+        </div>
+        <div class="max-w-2xl">
+            <a th:each="n : ${notifications}" th:href="${n.link != null ? n.link : '#'}"
+               class="flex items-start gap-4 py-4 border-b border-white/8 hover:bg-white/[0.02] transition px-2 -mx-2">
+                <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center border"
+                      th:classappend="${n.type.name() == 'WARNING'} ? 'border-red-400/30 text-red-400' :
+                                      (${n.type.name() == 'ORDER'} ? 'border-[#3FB6E4]/30 text-[#3FB6E4]' :
+                                      (${n.type.name() == 'MODERATION'} ? 'border-amber-400/30 text-amber-400' : 'border-emerald-400/30 text-emerald-400'))">
+                    <i th:class="${n.type.name() == 'WARNING'} ? 'fas fa-exclamation-triangle text-[11px]' :
+                                 (${n.type.name() == 'ORDER'} ? 'fas fa-box text-[11px]' :
+                                 (${n.type.name() == 'MODERATION'} ? 'fas fa-shield-alt text-[11px]' : 'fas fa-user-tag text-[11px]'))"></i>
+                </span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[13px] leading-relaxed" th:classappend="${n.read} ? 'text-white/45' : 'text-white/90'" th:text="${n.text}"></p>
+                    <p class="text-white/25 text-[11px] mt-1"
+                       th:text="${#temporals.format(n.createdAt.atZone(T(java.time.ZoneId).of('Europe/Moscow')), 'dd.MM.yyyy HH:mm')}"></p>
+                </div>
+                <span th:unless="${n.read}" class="w-2 h-2 mt-2 rounded-full bg-[#3FB6E4] flex-shrink-0"></span>
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══ ТАБ: ЗАЯВКА НА РОЛЬ ПРОДАВЦА ═══ -->
+    <div th:if="${user.role.name() == 'buyer'}" id="tab-seller" class="tab-panel">
+        <div class="max-w-xl">
+            <div th:if="${sellerRequest != null and sellerRequest.status.name() == 'PENDING'}"
+                 class="border border-amber-400/20 bg-amber-400/[0.04] p-6">
+                <p class="text-amber-300 text-[14px]"><i class="fas fa-hourglass-half mr-2"></i>Заявка на рассмотрении</p>
+                <p class="text-white/45 text-[13px] mt-2">
+                    Магазин «<span th:text="${sellerRequest.shopName}"></span>». Администратор рассмотрит заявку,
+                    результат придёт в уведомления.
+                </p>
+            </div>
+            <div th:unless="${sellerRequest != null and sellerRequest.status.name() == 'PENDING'}">
+                <p th:if="${sellerRequest != null and sellerRequest.status.name() == 'REJECTED'}"
+                   class="text-red-300/80 text-[13px] mb-5">
+                    <i class="fas fa-times-circle mr-1"></i> Предыдущая заявка отклонена — можно подать новую.
+                </p>
+                <p class="text-white/50 text-[13px] leading-relaxed mb-6">
+                    Продавцы размещают товары в каталоге и получают заказы. Каждый товар проходит модерацию перед публикацией.
+                </p>
+                <form th:action="@{/profile/seller-request}" method="post" class="space-y-4">
+                    <div>
+                        <label for="shopName" class="block text-white/30 text-[10px] uppercase tracking-[0.2em] mb-2">Название магазина</label>
+                        <input id="shopName" name="shopName" type="text" required maxlength="100"
+                               class="w-full bg-[#1a1a1a] border border-white/10 text-white text-[13px] px-3 py-2.5 focus:border-white/30 outline-none transition"
+                               placeholder="Например, Vintage Room">
+                    </div>
+                    <div>
+                        <label for="shopDescription" class="block text-white/30 text-[10px] uppercase tracking-[0.2em] mb-2">Что планируете продавать</label>
+                        <textarea id="shopDescription" name="description" rows="4" maxlength="1000"
+                                  class="w-full bg-[#1a1a1a] border border-white/10 text-white text-[13px] px-3 py-2.5 focus:border-white/30 outline-none transition"
+                                  placeholder="Винтажная одежда, кроссовки, аксессуары..."></textarea>
+                    </div>
+                    <button class="px-6 py-2.5 bg-[#3FB6E4] text-black text-[11px] uppercase tracking-[0.15em] hover:bg-[#3FB6E4]/90 transition">
+                        Отправить заявку
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ТАБ: ПРЕДУПРЕЖДЕНИЯ ═══ -->
+    <div th:if="${!#lists.isEmpty(warnings)}" id="tab-warnings" class="tab-panel">
+        <div class="max-w-2xl">
+            <div th:each="w : ${warnings}" class="py-4 border-b border-white/8">
+                <p class="text-red-300/90 text-[13px]">
+                    <i class="fas fa-exclamation-triangle text-[11px] mr-2"></i>
+                    <span th:text="${T(ru.vlsu.marketplace.services.UserModerationService).describe(w.type)}"></span>
+                </p>
+                <p class="text-white/45 text-[13px] mt-1" th:if="${w.comment != null and !#strings.isEmpty(w.comment)}" th:text="${w.comment}"></p>
+                <p class="text-white/25 text-[11px] mt-1"
+                   th:text="${#temporals.format(w.createdAt.atZone(T(java.time.ZoneId).of('Europe/Moscow')), 'dd.MM.yyyy HH:mm')} + ' · модератор ' + ${w.moderator.username}"></p>
+            </div>
+        </div>
+    </div>
+
 </div>
 </main>
 
@@ -174,11 +278,16 @@
 
         const activeClass = 'border-b-2 border-white text-white';
         const inactiveClass = 'border-b-2 border-transparent text-white/35 hover:text-white/60';
-        ['favorites', 'reviews'].forEach(t => {
+        ['favorites', 'reviews', 'notifications', 'seller', 'warnings'].forEach(t => {
             const btn = document.getElementById('tab-btn-' + t);
+            if (!btn) return;
             btn.className = `px-1 pb-4 mr-8 text-[11px] uppercase tracking-[0.25em] transition ${t === name ? activeClass : inactiveClass}`;
         });
     }
+
+    // Открываем вкладку из параметра ?tab=
+    const initialTab = /*[[${activeTab}]]*/ 'favorites';
+    if (document.getElementById('tab-' + initialTab)) switchTab(initialTab);
 
     function toggleEdit() {
         document.getElementById('edit-panel').classList.toggle('hidden');
@@ -191,10 +300,10 @@
         fd.append('username', username);
         fd.append('bio', bio);
         fetch(`/profile/${userId}/edit`, { method: 'POST', body: fd })
-            .then(r => r.text())
-            .then(() => {
-                document.getElementById('display-username').textContent = username;
-                toggleEdit();
+            .then(async r => {
+                const text = await r.text();
+                if (!r.ok) { alert(text || 'Не удалось сохранить профиль'); return; }
+                location.reload();
             });
     }
 
@@ -203,7 +312,7 @@
         const fd = new FormData();
         fd.append('avatar', input.files[0]);
         fetch(`/profile/${userId}/edit`, { method: 'POST', body: fd })
-            .then(() => location.reload());
+            .then(async r => { if (!r.ok) alert(await r.text()); location.reload(); });
     }
 </script>
 

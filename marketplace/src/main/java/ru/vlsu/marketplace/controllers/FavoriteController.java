@@ -17,6 +17,12 @@ public class FavoriteController {
     private final FavoriteService favoriteService;
     private final UserService userService;
 
+    /** Отдельной страницы нет — избранное показывается во вкладке профиля. */
+    @GetMapping
+    public String favoritesPage() {
+        return "redirect:/profile?tab=favorites";
+    }
+
     @PostMapping("/add/{productId}")
     public String add(@PathVariable Integer productId, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();

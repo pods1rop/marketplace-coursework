@@ -1,6 +1,9 @@
 package ru.vlsu.marketplace.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,6 +38,11 @@ public class ProductController {
     @GetMapping("/product/{id}")
     public String productPage(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
         Product product = productService.findById(id).orElseThrow();
+        User viewer = userDetails != null ? userService.findByUsername(userDetails.getUsername()).orElse(null) : null;
+        // Неопубликованный товар видят только владелец, модератор и администратор
+        if (product.getStatus() != Product.Status.APPROVED && !canSeeUnpublished(viewer, product)) {
+            throw new java.util.NoSuchElementException("Товар не опубликован");
+        }
         model.addAttribute("product", productService.convertToDto(product));
         model.addAttribute("productEntity", product);
         model.addAttribute("reviews", reviewService.getByProduct(id));
@@ -46,12 +54,17 @@ public class ProductController {
                 .stream().filter(p -> !p.getId().equals(id))
                 .map(productService::convertToDto).toList());
 
-        if (userDetails != null) {
-            User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
-            model.addAttribute("isFavorite", favoriteService.isFavorite(user.getId(), id));
-            model.addAttribute("hasReviewed", reviewService.reviewExists(user.getId(), id));
+        if (viewer != null) {
+            model.addAttribute("isFavorite", favoriteService.isFavorite(viewer.getId(), id));
+            model.addAttribute("hasReviewed", reviewService.reviewExists(viewer.getId(), id));
         }
         return "product";
+    }
+
+    private boolean canSeeUnpublished(User viewer, Product product) {
+        if (viewer == null) return false;
+        return viewer.getRole() == User.Role.admin || viewer.getRole() == User.Role.moderator
+                || product.getSeller().getId().equals(viewer.getId());
     }
 
     @GetMapping("/product/{id}/image")
@@ -75,20 +88,16 @@ public class ProductController {
     }
 
     @PostMapping("/product/{id}/review")
-    public String addReview(@PathVariable Integer id, @ModelAttribute ReviewDto dto,
-                            @AuthenticationPrincipal UserDetails userDetails) {
+    public String addReview(@PathVariable Integer id, @Valid @ModelAttribute ReviewDto dto, BindingResult binding,
+                            @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
+        if (binding.hasErrors()) {
+            ra.addFlashAttribute("flashError", binding.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:/product/" + id + "#reviews";
+        }
         User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
         Product product = productService.findById(id).orElseThrow();
-
-        if (!reviewService.reviewExists(user.getId(), id)) {
-            Review review = new Review();
-            review.setProduct(product);
-            review.setAuthor(user);
-            review.setRating(dto.getRating());
-            review.setText(dto.getText());
-            review.setCreatedAt(Instant.now());
-            reviewService.save(review);
-        }
-        return "redirect:/product/" + id;
+        reviewService.addReview(user, product, dto.getRating(), dto.getText());
+        ra.addFlashAttribute("flashSuccess", "Спасибо! Отзыв опубликован");
+        return "redirect:/product/" + id + "#reviews";
     }
 }

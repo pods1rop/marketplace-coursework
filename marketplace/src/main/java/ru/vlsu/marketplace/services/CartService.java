@@ -21,13 +21,20 @@ public class CartService {
     private final ProductRepository productRepository;
 
     public void addToCart(User user, Integer productId) {
+        Product product = productRepository.findById(productId).orElseThrow();
+        // В корзину попадают только опубликованные товары, причём не свои собственные
+        if (product.getStatus() != Product.Status.APPROVED) {
+            throw new IllegalStateException("Товар недоступен для покупки");
+        }
+        if (product.getSeller().getId().equals(user.getId())) {
+            throw new IllegalStateException("Нельзя купить собственный товар");
+        }
         Optional<CartItem> existing = cartItemRepository.findByUserIdAndProductId(user.getId(), productId);
         if (existing.isPresent()) {
             CartItem item = existing.get();
             item.setQuantity(item.getQuantity() + 1);
             cartItemRepository.save(item);
         } else {
-            Product product = productRepository.findById(productId).orElseThrow();
             CartItem item = new CartItem();
             item.setUser(user);
             item.setProduct(product);

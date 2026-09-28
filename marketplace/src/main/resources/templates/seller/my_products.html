@@ -58,6 +58,10 @@
                 class="px-1 pb-4 text-[11px] uppercase tracking-[0.25em] border-b-2 border-transparent text-white/35 hover:text-white/60 transition">
             Отклонённые
         </button>
+        <button id="tab-btn-removed" onclick="switchTab('removed')"
+                class="px-1 pb-4 ml-8 text-[11px] uppercase tracking-[0.25em] border-b-2 border-transparent text-white/35 hover:text-white/60 transition">
+            Снятые
+        </button>
     </div>
 
     <!-- ═══ ТАБ: ОПУБЛИКОВАННЫЕ ═══ -->
@@ -151,10 +155,46 @@
                 <div class="flex-1 min-w-0">
                     <p class="text-white/50 text-[14px] truncate" th:text="${p.title}"></p>
                     <span class="text-white/30 text-[13px]" th:text="${p.price} + ' ₽'"></span>
+                    <p th:if="${p.rejectReason != null}" class="text-red-300/70 text-[12px] mt-1.5">
+                        <i class="fas fa-comment-dots text-[10px] mr-1"></i>
+                        Причина: <span th:text="${p.rejectReason}"></span>
+                    </p>
                 </div>
-                <span class="text-red-400/60 text-[10px] uppercase tracking-wider px-2.5 py-1 border border-red-400/15 flex-shrink-0">
-                    Отклонён
-                </span>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="text-red-400/60 text-[10px] uppercase tracking-wider px-2.5 py-1 border border-red-400/15">
+                        Отклонён
+                    </span>
+                    <a th:href="@{'/seller/products/' + ${p.id} + '/edit'}" title="Исправить и отправить повторно"
+                       class="h-8 px-3 flex items-center gap-1.5 border border-white/10 text-white/45 text-[10px] uppercase tracking-wider hover:text-white hover:border-white/30 transition">
+                        <i class="fas fa-redo text-[9px]"></i> Исправить
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ТАБ: СНЯТЫЕ С ПРОДАЖИ ═══ -->
+    <div id="tab-removed" class="tab-panel">
+        <div th:if="${#lists.isEmpty(removed)}" class="py-16 text-center">
+            <i class="fas fa-archive text-white/8 text-5xl mb-6"></i>
+            <p class="text-white/25 text-[12px] uppercase tracking-[0.2em]">Снятых с продажи товаров нет</p>
+        </div>
+        <div class="space-y-2">
+            <div th:each="p : ${removed}"
+                 class="flex items-center gap-5 p-4 border border-white/8 bg-white/[0.01]">
+                <div class="w-16 h-20 bg-[#1a1a1a] flex-shrink-0 overflow-hidden opacity-60">
+                    <img th:if="${p.imageData != null}" th:src="@{'/product/' + ${p.id} + '/image'}"
+                         alt="" class="w-full h-full object-cover"/>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white/45 text-[14px] truncate" th:text="${p.title}"></p>
+                    <span class="text-white/30 text-[13px]" th:text="${p.price} + ' ₽'"></span>
+                </div>
+                <form th:action="@{'/seller/products/' + ${p.id} + '/restore'}" method="post">
+                    <button class="h-8 px-3 flex items-center gap-1.5 border border-emerald-400/20 text-emerald-400/70 text-[10px] uppercase tracking-wider hover:text-emerald-400 hover:border-emerald-400/40 transition">
+                        <i class="fas fa-undo text-[9px]"></i> Вернуть в продажу
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -168,7 +208,7 @@
         document.getElementById('tab-' + name).classList.add('active');
         const active = 'border-b-2 border-white text-white';
         const inactive = 'border-b-2 border-transparent text-white/35 hover:text-white/60';
-        ['approved','pending','rejected'].forEach(t => {
+        ['approved','pending','rejected','removed'].forEach(t => {
             const btn = document.getElementById('tab-btn-' + t);
             btn.className = `px-1 pb-4 mr-8 text-[11px] uppercase tracking-[0.25em] transition ${t === name ? active : inactive}`;
         });

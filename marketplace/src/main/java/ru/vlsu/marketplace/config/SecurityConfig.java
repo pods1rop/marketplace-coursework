@@ -1,6 +1,15 @@
 package ru.vlsu.marketplace.config;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,7 +34,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
+            // CSRF-защита включена: Thymeleaf добавляет токен в формы, fetch-запросы
+            // передают его в заголовке X-CSRF-TOKEN (см. fragments/header.html)
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/admin/experiments/**"))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/about", "/authentication", "/auth", "/auth/**", "/catalog", "/product/**", "/brands", "/brand/*/logo", "/main.css", "/css/**", "/js/**", "/images/**", "/photoformain/**", "/brends/**", "/product/*/image", "/error").permitAll()
                 .requestMatchers("/cart/**", "/orders/**", "/favorites/**", "/profile/**", "/reviews/**").authenticated()
@@ -49,7 +60,18 @@ public class SecurityConfig {
                 .key("marketplaceSecretKey")
                 .userDetailsService(userDetailsService)
             )
-            .userDetailsService(userDetailsService);
+            .userDetailsService(userDetailsService)
+            // Токен CSRF загружается заранее: иначе он создаётся лениво во время рендеринга
+            // шаблона, когда ответ уже частично отправлен и сессию создать нельзя
+            .addFilterAfter(new OncePerRequestFilter() {
+                @Override
+                protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                                FilterChain chain) throws ServletException, IOException {
+                    CsrfToken token = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+                    if (token != null) token.getToken();
+                    chain.doFilter(request, response);
+                }
+            }, CsrfFilter.class);
 
         return http.build();
     }

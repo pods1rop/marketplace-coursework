@@ -89,6 +89,9 @@ public class Product {
     @Column(name = "created_at")
     private Instant createdAt;
 
+    @Column(name = "reject_reason", length = 500)
+    private String rejectReason;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Review> reviews;
 

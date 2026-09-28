@@ -15,4 +15,10 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findBySellerIdOrderByCreatedAtDesc(@Param("sellerId") Integer sellerId);
 
     long countByStatus(Order.Status status);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status <> :excluded")
+    java.math.BigDecimal sumTotalExcludingStatus(@Param("excluded") Order.Status excluded);
+
+    @Query("SELECT DISTINCT i.product.seller FROM OrderItem i WHERE i.order.id = :orderId")
+    List<ru.vlsu.marketplace.entities.User> findSellersOfOrder(@Param("orderId") Integer orderId);
 }

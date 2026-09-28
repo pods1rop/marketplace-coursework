@@ -21,9 +21,14 @@
             <p class="text-white/30 text-[10px] uppercase tracking-[0.3em] mb-2">Админ-панель</p>
             <h1 class="text-white text-[26px] font-light tracking-wide">Дашборд</h1>
         </div>
-        <div class="hidden sm:flex items-center gap-2 text-white/30 text-[12px]">
-            <i class="fas fa-shield-alt text-[11px]"></i>
-            <span>Полный доступ</span>
+        <div class="flex items-center gap-4">
+            <span class="hidden md:inline text-white/40 text-[12px]">
+                Оборот: <span class="text-white/80" th:text="${#numbers.formatDecimal(revenue, 1, 'WHITESPACE', 0, 'POINT')} + ' ₽'">0 ₽</span>
+            </span>
+            <a href="/admin/report"
+               class="flex items-center gap-2 px-4 py-2.5 bg-white text-black text-[11px] uppercase tracking-[0.15em] hover:bg-white/90 transition">
+                <i class="fas fa-file-csv text-[12px]"></i> Статистический отчёт
+            </a>
         </div>
     </div>
 
@@ -85,6 +90,36 @@
                 </div>
                 <p class="text-white text-[32px] font-light leading-none" th:text="${pendingProducts}">0</p>
                 <p class="text-white/35 text-[11px] uppercase tracking-[0.15em] mt-2">На модерации</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ЗАЯВКИ НА РОЛЬ ПРОДАВЦА ═══ -->
+    <div class="mb-10">
+        <p class="text-white/30 text-[10px] uppercase tracking-[0.25em] mb-4">
+            Заявки на роль продавца
+            <span th:if="${!#lists.isEmpty(sellerRequests)}" class="ml-2 text-amber-400/80" th:text="${#lists.size(sellerRequests)}"></span>
+        </p>
+        <div th:if="${#lists.isEmpty(sellerRequests)}" class="bg-[#111] border border-white/8 p-6 text-white/30 text-[13px]">
+            Новых заявок нет
+        </div>
+        <div class="space-y-2">
+            <div th:each="r : ${sellerRequests}" class="bg-[#111] border border-amber-400/15 p-5 flex flex-col md:flex-row md:items-center gap-4">
+                <div class="flex-1 min-w-0">
+                    <p class="text-white/85 text-[14px]">
+                        <span th:text="${r.shopName}"></span>
+                        <span class="text-white/35 text-[12px] ml-2" th:text="'от ' + ${r.user.username} + ' (' + ${r.user.email} + ')'"></span>
+                    </p>
+                    <p class="text-white/45 text-[13px] mt-1" th:if="${r.description != null and !#strings.isEmpty(r.description)}" th:text="${r.description}"></p>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                    <form th:action="@{'/admin/seller-requests/' + ${r.id} + '/reject'}" method="post">
+                        <button class="px-4 py-2 border border-red-400/20 text-red-400/80 text-[11px] uppercase tracking-[0.15em] hover:bg-red-400/8 transition">Отклонить</button>
+                    </form>
+                    <form th:action="@{'/admin/seller-requests/' + ${r.id} + '/approve'}" method="post">
+                        <button class="px-4 py-2 bg-emerald-400/15 border border-emerald-400/30 text-emerald-400 text-[11px] uppercase tracking-[0.15em] hover:bg-emerald-400/25 transition">Одобрить</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

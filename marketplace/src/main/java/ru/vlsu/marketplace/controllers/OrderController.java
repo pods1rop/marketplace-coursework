@@ -1,12 +1,16 @@
 package ru.vlsu.marketplace.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.vlsu.marketplace.dto.OrderDto;
+import ru.vlsu.marketplace.entities.Order;
 import ru.vlsu.marketplace.entities.User;
 import ru.vlsu.marketplace.services.CartService;
 import ru.vlsu.marketplace.services.OrderService;
@@ -30,9 +34,15 @@ public class OrderController {
     }
 
     @PostMapping("/orders/checkout")
-    public String checkout(@ModelAttribute OrderDto dto, @AuthenticationPrincipal UserDetails userDetails) {
+    public String checkout(@Valid @ModelAttribute OrderDto dto, BindingResult binding,
+                           @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
+        if (binding.hasErrors()) {
+            ra.addFlashAttribute("flashError", binding.getAllErrors().get(0).getDefaultMessage());
+            return "redirect:/orders/checkout";
+        }
         User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
-        orderService.createOrder(user, dto);
+        Order order = orderService.createOrder(user, dto);
+        ra.addFlashAttribute("flashSuccess", "Заказ №" + order.getId() + " оформлен");
         return "redirect:/orders";
     }
 
@@ -44,14 +54,11 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{id}/cancel")
-    public String cancelOrder(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails) {
-        var order = orderService.findById(id).orElseThrow();
-        if (!order.getBuyer().getUsername().equals(userDetails.getUsername())) {
-            return "redirect:/orders";
-        }
-        if (order.getStatus() == ru.vlsu.marketplace.entities.Order.Status.NEW) {
-            orderService.updateStatus(id, ru.vlsu.marketplace.entities.Order.Status.CANCELLED);
-        }
+    public String cancelOrder(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes ra) {
+        User user = userService.findByUsername(userDetails.getUsername()).orElseThrow();
+        orderService.cancelByBuyer(user, id);
+        ra.addFlashAttribute("flashSuccess", "Заказ №" + id + " отменён");
         return "redirect:/orders";
     }
 }

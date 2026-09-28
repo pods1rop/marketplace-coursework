@@ -36,7 +36,7 @@
         <a href="/catalog" class="hover:text-white/70 transition">Каталог</a>
         <span class="text-white/20">/</span>
         <a th:href="@{/catalog(categoryId=${product.categoryId})}" th:text="${product.categoryName}" class="hover:text-white/70 transition"></a>
-        <th:block th:if="${product.brandName != null}">
+        <th:block th:if="${!#strings.isEmpty(product.brandName)}">
             <span class="text-white/20">/</span>
             <a th:href="@{/catalog(brandId=${product.brandId})}" th:text="${product.brandName}" class="hover:text-white/70 transition"></a>
         </th:block>
@@ -133,7 +133,7 @@
                     </div>
                     <span class="text-white/35 text-[12px]" th:if="${product.reviewsCount != null and product.reviewsCount > 0}">
                         <i class="fas fa-fire text-orange-400/70 text-[11px] mr-1"></i>
-                        <span th:text="${product.reviewsCount * 50} + ' купили'"></span>
+                        <span th:attr="data-count=${product.reviewsCount * 50}">0</span> купили
                     </span>
                 </div>
 
@@ -268,7 +268,7 @@
     </div>
 
     <!-- ═══ КАРТОЧКА БРЕНДА ═══ -->
-    <div th:if="${product.brandName != null}" class="mt-12 max-w-3xl">
+    <div th:if="${!#strings.isEmpty(product.brandName)}" class="mt-12 max-w-3xl">
         <a th:href="@{/catalog(brandId=${product.brandId})}"
            class="flex items-center justify-between gap-4 p-5 bg-white/[0.03] border border-white/8 hover:border-[#3FB6E4]/40 hover:bg-white/[0.05] transition">
             <div class="flex items-center gap-4">
@@ -294,7 +294,7 @@
                     <span class="text-white/40 text-[12.5px]">Категория</span>
                     <span class="text-white/85 text-[12.5px]" th:text="${product.categoryName}"></span>
                 </div>
-                <div th:if="${product.brandName != null}" class="grid grid-cols-[150px_1fr] py-3 px-4">
+                <div th:if="${!#strings.isEmpty(product.brandName)}" class="grid grid-cols-[150px_1fr] py-3 px-4">
                     <span class="text-white/40 text-[12.5px]">Бренд</span>
                     <span class="text-white/85 text-[12.5px]" th:text="${product.brandName}"></span>
                 </div>
@@ -440,21 +440,22 @@
     <div id="reviews" class="mt-16 pt-10 border-t border-white/8 max-w-3xl">
         <div class="flex items-baseline gap-4 mb-8">
             <h2 class="text-white text-[18px] font-semibold tracking-tight">Отзывы</h2>
-            <span class="text-white/35 text-[13px]" th:text="${product.reviewsCount}">0</span>
+            <span class="text-white/35 text-[13px]" th:attr="data-count=${product.reviewsCount}">0</span>
         </div>
 
         <!-- Сводка по рейтингу -->
         <div th:if="${product.averageRating != null and product.reviewsCount > 0}"
              class="flex items-center gap-6 p-5 bg-white/[0.03] border border-white/8 mb-8">
             <div>
-                <p class="text-white text-[42px] font-bold leading-none" th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}"></p>
+                <p class="text-white text-[42px] font-bold leading-none"
+                   th:attr="data-count=${product.averageRating},data-decimals=1">0</p>
                 <div class="flex gap-0.5 mt-1.5">
                     <i th:each="i : ${#numbers.sequence(1,5)}"
                        th:class="${i <= product.averageRating} ? 'fas fa-star text-yellow-400 text-[12px]' : 'far fa-star text-white/15 text-[12px]'"></i>
                 </div>
             </div>
             <div class="text-white/55 text-[12.5px] leading-relaxed">
-                <p>На основе <span class="text-white" th:text="${product.reviewsCount}"></span> отзывов</p>
+                <p>На основе <span class="text-white" th:attr="data-count=${product.reviewsCount}">0</span> отзывов</p>
                 <p class="text-white/35 text-[11px] mt-1">80% покупателей рекомендуют товар</p>
             </div>
         </div>
@@ -779,6 +780,7 @@
     // Deeplink: открыть гайд по #size-guide в URL
     if (window.location.hash === '#size-guide') openSizeGuide();
 </script>
+<script src="/js/count-up.js"></script>
 
 </body>
 </html>

@@ -54,8 +54,14 @@
                 </a>
 
                 <div sec:authorize="isAuthenticated()" class="flex items-center gap-3 sm:gap-4">
-                    <a href="/profile" class="text-white/70 hover:text-[#3FB6E4] transition" aria-label="Профиль">
+                    <a href="/profile" class="text-white/70 hover:text-[#3FB6E4] transition relative" aria-label="Профиль">
                         <i class="far fa-user text-[17px]"></i>
+                    </a>
+                    <a href="/profile?tab=notifications" class="text-white/70 hover:text-[#3FB6E4] transition relative" aria-label="Уведомления">
+                        <i class="far fa-bell text-[17px]"></i>
+                        <span th:if="${unreadNotifications != null and unreadNotifications > 0}"
+                              class="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#3FB6E4] text-black text-[9px] font-bold flex items-center justify-center"
+                              th:text="${unreadNotifications > 99 ? '99+' : unreadNotifications}">1</span>
                     </a>
                     <a href="/cart" class="text-white/70 hover:text-[#3FB6E4] transition relative" aria-label="Корзина">
                         <i class="fas fa-shopping-bag text-[16px]"></i>
@@ -185,6 +191,9 @@
                 <a href="/moderation" class="flex items-center gap-3 px-5 py-3 text-white/75 text-[13px] hover:bg-white/5 hover:text-white transition">
                     <i class="fas fa-shield-alt text-white/30 w-5 text-[14px]"></i> Очередь модерации
                 </a>
+                <a href="/moderation/users" class="flex items-center gap-3 px-5 py-3 text-white/75 text-[13px] hover:bg-white/5 hover:text-white transition">
+                    <i class="fas fa-user-shield text-white/30 w-5 text-[14px]"></i> Нарушители
+                </a>
             </span>
 
             <span sec:authorize="hasAuthority('ROLE_admin')">
@@ -224,6 +233,34 @@
         .cat-scroll::-webkit-scrollbar { display: none; }
         .cat-scroll { scrollbar-width: none; }
     </style>
+
+    <!-- Всплывающее сообщение о результате действия (flash-атрибуты) -->
+    <div id="flash-toast" th:if="${flashError != null or flashSuccess != null}"
+         class="fixed top-20 right-4 sm:right-6 z-[60] max-w-sm px-5 py-3.5 text-[13px] border shadow-2xl transition-all duration-300"
+         th:classappend="${flashError != null} ? 'bg-[#1a0f0f] border-red-400/30 text-red-300' : 'bg-[#0f1a14] border-emerald-400/30 text-emerald-300'">
+        <i th:class="${flashError != null} ? 'fas fa-exclamation-circle mr-2' : 'fas fa-check-circle mr-2'"></i>
+        <span th:text="${flashError != null ? flashError : flashSuccess}"></span>
+    </div>
+
+    <script th:inline="javascript">
+        // CSRF-токен Spring Security для fetch-запросов: добавляется ко всем изменяющим запросам
+        (function() {
+            const token = /*[[${_csrf != null ? _csrf.token : null}]]*/ null;
+            const header = /*[[${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}]]*/ 'X-CSRF-TOKEN';
+            const nativeFetch = window.fetch.bind(window);
+            window.fetch = function(input, init) {
+                init = init || {};
+                const method = (init.method || 'GET').toUpperCase();
+                const headers = new Headers(init.headers || {});
+                headers.set('X-Requested-With', 'fetch');
+                if (token && method !== 'GET' && method !== 'HEAD') headers.set(header, token);
+                init.headers = headers;
+                return nativeFetch(input, init);
+            };
+            const toast = document.getElementById('flash-toast');
+            if (toast) setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 4500);
+        })();
+    </script>
 
     <script>
         (function() {

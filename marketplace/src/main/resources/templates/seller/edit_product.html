@@ -78,9 +78,9 @@
                 <div class="grid grid-cols-2 gap-5">
                     <div>
                         <label for="categoryId" class="block text-white/35 text-[10px] uppercase tracking-[0.2em] mb-2">Категория</label>
-                        <select id="categoryId" name="categoryId"
+                        <select id="categoryId" name="categoryId" required
                                 class="w-full bg-[#1a1a1a] border border-white/10 text-white/70 text-[13px] px-4 py-3 focus:border-white/35 outline-none transition">
-                            <option value="">Без категории</option>
+                            <option value="" disabled th:selected="${productDto.categoryId == null}">Выберите категорию</option>
                             <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
                                     th:selected="${cat.id == productDto.categoryId}"></option>
                         </select>
