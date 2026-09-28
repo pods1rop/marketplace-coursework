@@ -1,0 +1,178 @@
+{
+ "Smoke": {
+  "threads": 1,
+  "n": 60,
+  "avg": 28.9,
+  "med": 17,
+  "p90": 78,
+  "p95": 79,
+  "mx": 83,
+  "rps": 4.4,
+  "err": 0,
+  "dur": 13.7,
+  "eps": {
+   "GET /auth (CSRF-токен)": {
+    "avg": 8.9,
+    "p90": 12,
+    "n": 10
+   },
+   "POST /auth/login": {
+    "avg": 78.9,
+    "p90": 81,
+    "n": 10
+   },
+   "GET /catalog?categoryId": {
+    "avg": 23.4,
+    "p90": 28,
+    "n": 10
+   },
+   "GET /product/{id}": {
+    "avg": 43,
+    "p90": 50,
+    "n": 10
+   },
+   "POST /cart/add/{id}": {
+    "avg": 10.6,
+    "p90": 13,
+    "n": 10
+   },
+   "GET /orders": {
+    "avg": 8.7,
+    "p90": 9,
+    "n": 10
+   }
+  }
+ },
+ "Load": {
+  "threads": 5,
+  "n": 600,
+  "avg": 27.6,
+  "med": 14,
+  "p90": 77,
+  "p95": 79,
+  "mx": 89,
+  "rps": 19.3,
+  "err": 0,
+  "dur": 31.1,
+  "eps": {
+   "GET /auth (CSRF-токен)": {
+    "avg": 5.8,
+    "p90": 7,
+    "n": 100
+   },
+   "POST /auth/login": {
+    "avg": 78.3,
+    "p90": 83,
+    "n": 100
+   },
+   "GET /catalog?categoryId": {
+    "avg": 21.5,
+    "p90": 27,
+    "n": 100
+   },
+   "GET /product/{id}": {
+    "avg": 41.9,
+    "p90": 48,
+    "n": 100
+   },
+   "POST /cart/add/{id}": {
+    "avg": 9.2,
+    "p90": 11,
+    "n": 100
+   },
+   "GET /orders": {
+    "avg": 9.1,
+    "p90": 11,
+    "n": 100
+   }
+  }
+ },
+ "Multithread": {
+  "threads": 20,
+  "n": 6000,
+  "avg": 36.5,
+  "med": 19,
+  "p90": 84,
+  "p95": 90,
+  "mx": 538,
+  "rps": 73.7,
+  "err": 0,
+  "dur": 81.5,
+  "eps": {
+   "GET /auth (CSRF-токен)": {
+    "avg": 7.9,
+    "p90": 10,
+    "n": 1000
+   },
+   "POST /auth/login": {
+    "avg": 84.0,
+    "p90": 92,
+    "n": 1000
+   },
+   "GET /catalog?categoryId": {
+    "avg": 23.7,
+    "p90": 31,
+    "n": 1000
+   },
+   "GET /product/{id}": {
+    "avg": 48.6,
+    "p90": 59,
+    "n": 1000
+   },
+   "POST /cart/add/{id}": {
+    "avg": 45.0,
+    "p90": 173,
+    "n": 1000
+   },
+   "GET /orders": {
+    "avg": 10.0,
+    "p90": 12,
+    "n": 1000
+   }
+  }
+ },
+ "Stress": {
+  "threads": 50,
+  "n": 30000,
+  "avg": 114.4,
+  "med": 88,
+  "p90": 258,
+  "p95": 334,
+  "mx": 1235,
+  "rps": 142.5,
+  "err": 0,
+  "dur": 210.5,
+  "eps": {
+   "GET /auth (CSRF-токен)": {
+    "avg": 141.6,
+    "p90": 361,
+    "n": 5000
+   },
+   "POST /auth/login": {
+    "avg": 166.3,
+    "p90": 280,
+    "n": 5000
+   },
+   "GET /catalog?categoryId": {
+    "avg": 78.8,
+    "p90": 166,
+    "n": 5000
+   },
+   "GET /product/{id}": {
+    "avg": 138.7,
+    "p90": 263,
+    "n": 5000
+   },
+   "POST /cart/add/{id}": {
+    "avg": 93.5,
+    "p90": 221,
+    "n": 5000
+   },
+   "GET /orders": {
+    "avg": 67.3,
+    "p90": 167,
+    "n": 5000
+   }
+  }
+ }
+}
